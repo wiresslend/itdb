@@ -21,7 +21,7 @@ for ($i=0;$i<count($selitems);$i++)  {
 
 //$sql="SELECT items.id,model,sn,sn3,itemtypeid,dnsname,ipv4,ipv6,label, agents.title as agtitle FROM items,agents ".
 //     " WHERE agents.id=items.manufacturerid AND items.id in ($ids) order by itemtypeid, agtitle, model,sn,sn2,sn3";
-$sql="SELECT items.id,model,sn,sn3,itemtypeid,dnsname,ipv4,ipv6,label, agents.title as agtitle FROM items,agents ".
+$sql="SELECT items.id,model,sn,sn3,itemtypeid,cpu,ram,hd,ipv6,label, agents.title as agtitle FROM items,agents ".
      " WHERE agents.id=items.manufacturerid AND items.id in ($ids) order by items.id";
 $sth=db_execute($dbh,$sql);
 $idx=0;
@@ -42,12 +42,13 @@ $pdf=new PDF_Label(array(
   'font-size'=>$fontsize));
 
 $pdf->AddPage();
-$pdf->SetAuthor('ITDB Asset Management');
-$pdf->SetTitle('Items');
+//$pdf->SetAuthor('ITDB Asset Management');
+//$pdf->SetTitle('Items');
 
 $pdf->setFontSubsetting(true);
 $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
+//$pdf->SetAutoPageBreak(TRUE,PDF_MARGIN_BOTTOM);
 
 /* skip specified labels, to avoid printing on missing label positions on reused papers*/
 for ($skipno=0;$skipno<$labelskip;$skipno++) {
@@ -65,34 +66,38 @@ for ($row=1;$row<=$rows;$row++) {
 
     $idesc=$itypes[$r['itemtypeid']]['typedesc'];
     $id=sprintf("%04d",$r['id']);
-    $dnsname=$r['dnsname'];
-    $ipv4=$r['ipv4'];
-    $ipv4=mb_substr($ipv4,0,15);
-    $ipv6=$r['ipv6'];
     $agtitle=$r['agtitle'];
     $model=$r['model'];
     $label=$r['label'];
+    $cpu=$r['cpu'];
+    $ram=$r['ram'];
+    $hd=$r['hd'];
+
 
     $desc="$agtitle/$model";
     $desc=mb_substr($desc,0,37);
     $desc=trim($desc);
     $sn=strlen($r['sn'])>0?$r['sn']:$r['sn3'];
 
-    $labeltext="";
-    $labeltext.=sprintf("ID:$id\n");
-    if (strlen($label)) $labeltext.=sprintf("LBL:$label\n");
-
-    if (strlen($sn)) $labeltext.=sprintf("SN:$sn\n");
-
-    if (strlen($desc)) { $labeltext.=$desc."\n"; }
-
-    if (strlen($ipv4)) { $labeltext.="IPv4:$ipv4\n"; }
-    if (strlen($ipv6)) { $labeltext.="IPv6:$ipv6\n"; }
-
-    if (strlen($dnsname)) { 
-       $labeltext.="HName:$dnsname\n";
-    }
-    $labeltext=rtrim($labeltext);
+    $labeltext= array ('idesc'=>$idesc,'id'=>$id,'agtitle'=>$agtitle,'model'=>$model,'lable'=>$label,'cpu'=>$cpu,
+    'ram'=>$ram,'hd'=>$hd);
+//    $labeltext.=sprintf("ID:$id\n");
+//    if (strlen($label)) $labeltext.=sprintf("LBL:$label\n");
+//
+//    if (strlen($sn)) $labeltext.=sprintf("SN:$sn\n");
+//
+//    if (strlen($desc)) { $labeltext.=$desc."\n"; }
+//
+//    if (strlen($cpu)){
+//        $labeltext.="CPU:$cpu";
+//    }
+//    if (strlen($ram)){
+//        $labeltext.="RAM:$ram GB";
+//    }
+//    if(strlen($hd)){
+//        $labeltext.="HD:$hd GB";
+//    }
+//    $labeltext=rtrim($labeltext);
 
     if (!$wantheadertext)
       $headertext="";

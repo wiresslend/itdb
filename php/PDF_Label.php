@@ -80,6 +80,7 @@ class PDF_Label extends TCPDF{
 				$this->Error('Unknown label format: '.$format);
 			$Tformat = $this->_Avery_Labels[$format];
 		}
+		$this->setPrintHeader(false);
 
 		//parent::TCPDF('P', $unit, $Tformat['paper-size']);
 
@@ -145,7 +146,7 @@ class PDF_Label extends TCPDF{
 
 	// Print a label
 	// sivann
-	function Add_Label($text_head, $text, $padding=3, $bordercolor=230, $img="",$imwidth=0,$imheight=0,
+	function Add_Label($text_head, $text=array(), $padding=3, $bordercolor=230, $img="",$imwidth=0,$imheight=0,
                            $headerfontsize=6,$fontsize=6,$idfontsize=7,$barcode="",$bar_w="0.4",$bar_h="20",$barcodesize=20,$raligntext=0) {
 		$this->_COUNTX++;
 		if ($this->_COUNTX == $this->_X_Number) {
@@ -158,6 +159,43 @@ class PDF_Label extends TCPDF{
 				$this->AddPage();
 			}
 		}
+		$this->SetDefaultMonospacedFont('courier');
+		$td_width=(string)($this->_Height/4);
+        $html=<<<EOD
+<table border="" cellspacing="1" style="font-size: 10px;">
+<tr>
+	<td height="" colspan="2" align="center" style="font-size: 12px;">易斯顿美术学院IT资产登记</td>
+</tr>
+<tr>
+<td colspan="2"></td>
+</tr>
+<tr>
+	<td height="$td_width">设备ID：62132609</td>
+	<td height="$td_width">CPU：Intel I7-6700k</td>
+</tr>
+
+<tr>
+	<td height="$td_width">资产类型：组装台式电脑</td>
+	<td height="$td_width">显卡：集成显卡</td>
+</tr>
+<tr>
+	<td height="$td_width">使用人:唐坤建</td>
+	<td height="$td_width">内存：金士顿 8GB*2</td>
+</tr>
+<tr>
+	<td height="$td_width">部门：现教中心</td>
+	<td height="$td_width">硬盘：希捷2TB</td>
+</tr>
+<tr>
+	<td height="$td_width">登记日期：20140508</td>
+	<td height="$td_width">主板：华硕 Z97 OC</td>
+</tr>
+<tr>
+	<td height="$td_width"></td>
+	<td height="$td_width">显示器：DELL U2312</td>
+</tr>
+</table>
+EOD;
 
 		//$_PosX = $this->_Margin_Left + $this->_COUNTX*($this->_Width+$this->_X_Space) + $this->_Padding;
 		//$_PosY = $this->_Margin_Top + $this->_COUNTY*($this->_Height+$this->_Y_Space) + $this->_Padding;
@@ -168,28 +206,28 @@ class PDF_Label extends TCPDF{
 		//$this->SetXY($_PosX, $_PosY);
 
 		//sivann:
-                if (strlen($img)) {
-		  $this->Image($img, $_PosX+$padding, $_PosY+$padding, $imwidth,0);
-		  $imwidth+=1; //dont glue it with text
-		  $imheight+=1;
-		}
+//                if (strlen($img)) {
+//		  $this->Image($img, $_PosX+$padding, $_PosY+$padding, $imwidth,0);
+//		  $imwidth+=1; //dont glue it with text
+//		  $imheight+=1;
+//		}
 
 		//draw text
 		//header
-		$this->SetTextColor(0,70,100); 
-		$this->Set_Font_Size($headerfontsize);
-		$this->SetXY($_PosX+$imwidth+$padding, $_PosY+$padding);
-		//$this->MultiCell($this->_Width-$imwidth-(2*$padding), $this->_Line_Height, $text_head);
-		$this->MultiCell($this->_Width-$imwidth-(2*$padding), $this->_Line_Height, $text_head,0,'L');
+//		$this->SetTextColor(0,70,100);
+//		$this->Set_Font_Size($headerfontsize);
+//		$this->SetXY($_PosX+$imwidth+$padding, $_PosY+$padding);
+//		//$this->MultiCell($this->_Width-$imwidth-(2*$padding), $this->_Line_Height, $text_head);
+//		$this->MultiCell($this->_Width-$imwidth-(2*$padding), $this->_Line_Height, $text_head,0,'L');
 
 
-		if (strstr($text,"ID:")) {
-		  $txtid=$text;
+		if ($text['id']) {
+		  $txtid=$text['id'];
 		  $txtid=str_replace("\n","",$txtid);
 		  $txtid=preg_replace('/.*ID:([0-9]+).*/','ID:\1 ',$txtid);
-		  $text=preg_replace('/ID:[0-9]+\n/','',$text);
+//		  $text=preg_replace('/ID:[0-9]+\n/','',$text);
 		  $this->SetFont('freesans','B');
-		  $this->SetTextColor(0,0,0); 
+		  $this->SetTextColor(0,0,0);
 		  $this->Set_Font_Size($idfontsize);
 
 		  if (!$raligntext) {
@@ -199,7 +237,7 @@ class PDF_Label extends TCPDF{
 			  else {
 				$this->SetXY($_PosX, $_PosY+$imheight);
 			  }
-			  $this->MultiCell($this->_Width-(2*$padding), $this->_Line_Height, "$txtid",0,'L');
+//			  $this->MultiCell($this->_Width-(2*$padding), $this->_Line_Height, "$txtid",0,'L');
 			}
 		}
 
@@ -238,22 +276,24 @@ class PDF_Label extends TCPDF{
 
 		//rest of the text
 
+
 		if ($raligntext) {
 			//$this->SetXY($_PosX+$barcodesize-2, $Y+$qz-3);
 			$this->SetFont('freesans','B');
 			$this->SetXY($_PosX+$barcodesize, $Y+$qz);
-			$this->MultiCell($this->_Width-(2*$padding), $this->_Line_Height, $txtid,0,'L');
+
+//			$this->MultiCell($this->_Width-(2*$padding), $this->_Line_Height, $txtid,0,'L');
 			$this->SetX($_PosX+$barcodesize); //position to the left border, we are now under the logo image hopefully
 		}
 		else {
 			$this->SetX($_PosX); //position to the left border, we are now under the logo image hopefully
 		}
 
-		$this->SetFont('freesans');
+		$this->SetFont('stsongstdlight');
 		$this->SetTextColor(0,0,0); 
-		$this->Set_Font_Size($fontsize);
-
-		$this->MultiCell($this->_Width-(2*$padding), $this->_Line_Height, $text,0,'L');
+		$this->Set_Font_Size(12);
+        $this->writeHTMLCell($this->_Width-(2*$padding),$this->_Line_Height,$_PosX+1,$_PosY+5,$html);
+//		$this->MultiCell($this->_Width-(2*$padding), $this->_Line_Height, $text['cpu'],0,'L');
 
 		if ($bordercolor) 
 		  $this->SetDrawColor($bordercolor,$bordercolor,$bordercolor);
